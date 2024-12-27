@@ -60,6 +60,9 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            docker --version > /dev/null 2>&1 || (sudo apt update && sudo apt install -y docker.io \
-            && sudo usermod -aG docker $USER && newgrp docker)
-            docker run --name app-with-actions-server -p 8080:8080 -d ${{ vars.DOCKERHUB_USERNAME }}/app-with-actions:latest
+            docker --version > /dev/null 2>&1 || (sudo apt update && sudo apt install -y docker.io)
+            sudo docker stop $(sudo docker ps -aq)
+            sudo docker rm $(sudo docker ps -aq)
+            sudo docker pull ${{ vars.DOCKERHUB_USERNAME }}/app-with-actions:latest       
+            sudo docker run --name app-with-actions-server -p 8080:8080 \
+            -d ${{ vars.DOCKERHUB_USERNAME }}/app-with-actions:latest
