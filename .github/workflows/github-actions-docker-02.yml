@@ -1,7 +1,7 @@
 name: App With Github Actions with Docker CI/CD
 
 on:
-  workflow_dispatch
+  push
 
 jobs:
   ci:
@@ -48,3 +48,16 @@ jobs:
           context: .
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/app-with-actions:latest
+  cd:
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Docker Container
+        uses: appleboy/ssh-action@v1.2.0
+        # run docker container
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            docker run --name app-with-actions-server -p 8080:8080 -d ${{ vars.DOCKERHUB_USERNAME }}/app-with-actions:latest
